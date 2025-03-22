@@ -12,11 +12,12 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
-    "@tauri-apps/api": "2.3.0",
     "@tauri-apps/plugin-fs": "^2.2.0",
     "@tauri-apps/plugin-log": "^2.3.0",
+    "@zxing/library": "^0.21.3",
     "vite": "^4.0.0",
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "vue-qrcode-reader": "^5.7.1"
   },
   "devDependencies": {
     "@tauri-apps/api": "^2.3.0",

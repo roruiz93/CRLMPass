@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Subir y Convertir Excel a JSON</h2>
+    <h2>Subir y Guardar Excel como JSON</h2>
     <input type="file" @change="handleFileChange" />
     <button @click="convertExcelToJson" :disabled="!file">Convertir y Guardar JSON</button>
 
@@ -14,13 +14,11 @@
 <script setup>
 import { ref } from "vue";
 import * as XLSX from "xlsx";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { BaseDirectory } from "@tauri-apps/api/path";
 
 const file = ref(null);
 const excelJson = ref([]);
 
-
+// Capturar archivo Excel
 function handleFileChange(event) {
   const selectedFile = event.target.files[0];
   if (selectedFile) {
@@ -28,12 +26,12 @@ function handleFileChange(event) {
   }
 }
 
-// Convertir Excel a JSON 
+// Convertir Excel a JSON y guardarlo en IndexedDB
 async function convertExcelToJson() {
   if (!file.value) return;
 
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.onload = (e) => {
     const data = e.target.result;
     const workbook = XLSX.read(data, { type: "array" });
 
@@ -44,30 +42,48 @@ async function convertExcelToJson() {
     excelJson.value = jsonData;
     console.log("📄 JSON generado:", jsonData);
 
-    try {
-      // Guarda el JSON  en el app
-      console.log("entre al try");
-      await writeTextFile("ClubRegatas_datos.json", JSON.stringify(jsonData), {   
-        dir: BaseDirectory.AppData,
-      });
-      console.log("sali del try");
-      console.log("✅ Archivo JSON guardado en la app");
-    } catch (error) {     
-      console.error("❌ Error al guardar JSON:", error);
-    }
+    // Guardar JSON en IndexedDB
+    saveJsonToIndexedDB(jsonData);
   };
 
   reader.readAsArrayBuffer(file.value);
+}
+
+// Guardar JSON en IndexedDB
+function saveJsonToIndexedDB(jsonData) {
+  const request = indexedDB.open("CRLMPassDB", 1);
+
+  request.onupgradeneeded = function (event) {
+    const db = event.target.result;
+    if (!db.objectStoreNames.contains("socios")) {
+      db.createObjectStore("socios", { keyPath: "id" });
+    }
+  };
+
+  request.onsuccess = function (event) {
+    const db = event.target.result;
+    const transaction = db.transaction("socios", "readwrite");
+    const store = transaction.objectStore("socios");
+
+    store.put({ id: 1, data: jsonData });
+
+    console.log("✅ JSON guardado en IndexedDB");
+  };
+
+  request.onerror = function (event) {
+    console.error("❌ Error al guardar en IndexedDB", event.target.error);
+  };
 }
 </script>
 
 <style scoped>
 pre {
-  background-color: #f5f5f5;
+  background-color: #3c3a3a;
   padding: 10px;
   border-radius: 5px;
   max-height: 200px;
   overflow: auto;
+  color: white;
 }
 button {
   margin: 10px;
