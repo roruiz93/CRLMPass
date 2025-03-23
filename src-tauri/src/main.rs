@@ -12,6 +12,13 @@ struct Socio {
     apellido: String,
     deuda: f64,
 }
+#[derive(Serialize, Deserialize, Debug)]
+struct Operarios{
+    codigo: String,
+    nombre: String,
+    categoria:String,
+    
+}
 
 // 📂 Obtener la ruta donde se guardará el JSON
 fn obtener_ruta_archivo() -> PathBuf {

@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h2>Buscar Socio</h2>
+    <h2>Buscar Socio, Empleado o Invitado</h2>
 
     <!-- Input manual -->
-    <input v-model="numeroSocio" placeholder="Ingrese número de socio" />
-    <button @click="buscarSocio">Buscar Socio</button>
+    <input v-model="numeroSocio" placeholder="Ingrese número de socio, empleado o invitado" />
+    <button @click="identificarTipo">Buscar</button>
 
     <!-- Botón para escanear QR -->
     <button @click="activarEscaneo">{{ escaneando ? "Detener Escaneo" : "Escanear QR" }}</button>
@@ -12,12 +12,28 @@
     <!-- Video de cámara para escaneo -->
     <video id="video" width="100%" height="100%" autoplay v-show="escaneando"></video>
 
-    <!-- Mostrar datos del socio -->
-    <div v-if="datosSocio" :style="fondoSocio"  class="datos-socio">
-      <p class="label">Número de socio</p>
-      <p class="value">{{ datosSocio["Socio"] }}</p>
-      <p class="label">Socio</p>
-      <p class="value">{{datosSocio["Nombre"] }}</p>
+    <!-- Mostrar datos -->
+    <div v-if="datosBusqueda" :style="fondoSocio" class="datos-socio">
+      <!-- Socio -->
+      <div v-if="esSocio">
+        <p class="label">Número</p>
+        <p class="value">{{ datosBusqueda["Socio"] }}</p>
+        <p class="label">Nombre</p>
+        <p class="value">{{ datosBusqueda["Nombre"] }}</p>
+        
+      </div>
+
+      <!-- Empleado -->
+      <div v-if="esEmpleado">
+        <p class="label">Nombre</p>
+        <p class="value">{{ datosBusqueda["nombre"] }}</p>
+      </div>
+
+      <!-- Invitado -->
+      <div v-if="esInvitado">
+       
+        <p class="value">Invitado</p>
+      </div>
     </div>
 
     <p v-if="error">{{ error }}</p>
@@ -29,52 +45,157 @@ import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { BrowserMultiFormatReader } from "@zxing/library";
 
 const numeroSocio = ref("");
-const datosSocio = ref(null);
+const datosBusqueda = ref(null);
 const error = ref(null);
 const escaneando = ref(false);
+const esSocio = ref(false);
+const esEmpleado = ref(false);
+const esInvitado = ref(false);
+const qrSocio = ref(""); // QR del socio para asociar al invitado
+const socioAsociado = ref(null); // Nombre del socio asociado
+const mostrarInputSocio = ref(false); // Flag para mostrar el campo de asociación
+
 let codeReader = new BrowserMultiFormatReader();
 let videoElement = null;
 
-// 📌 Función para buscar socio en IndexedDB
-async function buscarSocio() {
+// 📌 Función para identificar el tipo y buscar el socio o empleado
+async function identificarTipo() {
+  // 1️⃣ Limpiar pantalla antes de cada búsqueda
   error.value = null;
-  datosSocio.value = null;
+  datosBusqueda.value = null;
+  mostrarInputSocio.value = false;
+  esSocio.value = false;
+  esEmpleado.value = false;
+  esInvitado.value = false;
+  
 
-  const request = indexedDB.open("CRLMPassDB", 1);
+  // 2️⃣ Identificar tipo de código ingresado
+  if (numeroSocio.value.match(/^\d+$/)) {
+    esSocio.value = true;  
+  } else if (numeroSocio.value.match(/^[a-zA-Z]{3}[0-9]{3}$/)) {
+    esEmpleado.value = true;
+  } else if (numeroSocio.value.match(/^[a-zA-Z]+$/)) {
+    esInvitado.value = true;
+    mostrarInputSocio.value = true;
+    guardarEnPagos(numeroSocio.value);
+  }
 
-  request.onsuccess = function (event) {
-    const db = event.target.result;
-    const transaction = db.transaction("socios", "readonly");
-    const store = transaction.objectStore("socios");
+  // 3️⃣ Buscar en la base de datos según el tipo identificado
+  if (esSocio.value) {
+    datosBusqueda.value = await buscarSocio(numeroSocio.value);
+  } else if (esEmpleado.value) {
+    datosBusqueda.value = await buscarEmpleado(numeroSocio.value);
+  } else if (esInvitado.value) {
+    datosBusqueda.value = numeroSocio.value;
+  } else {
+    error.value = "Número no válido";
+  }
 
-    const getRequest = store.get(1);
+  // 4️⃣ Limpiar input después de buscar
+  numeroSocio.value = "";
+}
 
-    getRequest.onsuccess = function () {
-      if (getRequest.result) {
+// Función para guardar en la base de datos de pagos dependiendo del tipo
+async function guardarEnPagos(tipo) {
+  if (tipo === "invitado") {
+    await agregarPago("invitado", 50);
+  } else if (tipo === "invitadoFeb") {
+    await agregarPago("invitadoFeb", 40);
+  }
+}
+
+// Función para agregar el pago en la base de datos de pagos
+async function agregarPago(tipo, monto) {
+  const pago = {
+    tipo: tipo,
+    monto: monto,
+    fecha: new Date().toLocaleString(),
+  };
+  console.log("Pago guardado:", pago);
+}
+
+// Función para asociar un socio a un invitado
+/* async function asociarSocio() {
+  if (!numeroSocioAsociado.value) {
+    error.value = "Por favor ingrese el número de socio a asociar.";
+    return;
+  }
+} */
+// 📌 Buscar socio por número en la base de datos de socios
+async function buscarSocio(numero) {
+  const request = indexedDB.open("CRLMPassDB", 2);
+  return new Promise((resolve, reject) => {
+    request.onsuccess = function (event) {
+      const db = event.target.result;
+      const transaction = db.transaction("socios", "readonly");
+      const store = transaction.objectStore("socios");
+      const getRequest = store.get(1); // Obtener todos los socios
+
+      getRequest.onsuccess = function () {
         const socios = getRequest.result.data;
         const socioEncontrado = socios.find(
-          (socio) => String(socio["Socio"]) === numeroSocio.value
+          (socio) => String(socio["Socio"]) === numero
         );
+        resolve(socioEncontrado);
+      };
 
-        if (socioEncontrado) {
-          datosSocio.value = socioEncontrado;
-        } else {
-          error.value = "Número de socio no encontrado";
-        }
-      } else {
-        error.value = "No hay datos guardados";
-      }
+      getRequest.onerror = function () {
+        reject("Error al leer datos de IndexedDB");
+      };
     };
-
-    getRequest.onerror = function () {
-      error.value = "Error al leer datos de IndexedDB";
+    request.onerror = function (event) {
+      reject("Error al abrir IndexedDB: " + event.target.error);
     };
-  };
-
-  request.onerror = function (event) {
-    error.value = "Error al abrir IndexedDB: " + event.target.error;
-  };
+  });
 }
+
+// 📌 Buscar empleado por código alfanumérico en la base de datos de operarios
+async function buscarEmpleado(codigo) {
+  const request = indexedDB.open("CRLMPassDB", 2);
+  return new Promise((resolve, reject) => {
+    request.onsuccess = function (event) {
+      const db = event.target.result;
+      const transaction = db.transaction("operarios", "readonly");
+      const store = transaction.objectStore("operarios");
+      const getRequest = store.get(1); // Obtener todos los operarios
+
+      getRequest.onsuccess = function () {
+        const operarios = getRequest.result.data;
+        const empleadoEncontrado = operarios.find(
+          (empleado) => String(empleado["codigo"]) === codigo
+        );
+        resolve(empleadoEncontrado);
+      };
+
+      getRequest.onerror = function () {
+        reject("Error al leer datos de IndexedDB");
+      };
+    };
+    request.onerror = function (event) {
+      reject("Error al abrir IndexedDB: " + event.target.error);
+    };
+  });
+}
+
+// 📌 Asociar socio con invitado
+/* const asociarSocio = () => {
+  if (!qrSocio.value.trim()) {
+    error.value = "Por favor, escanee el QR del socio.";
+    return;
+  } 
+
+  // Buscar al socio que corresponde al QR escaneado
+  const socioEncontrado = buscarSocioByQR(qrSocio.value);
+
+  if (socioEncontrado) {
+    socioAsociado.value = socioEncontrado.Nombre;
+    console.log(`Invitado asociado con socio ${socioEncontrado.Nombre}`);
+    // Aquí registrarías el pago del invitado en la base de datos
+    registrarPagoInvitado(socioEncontrado);
+  } else {
+    error.value = "Socio no encontrado. No se puede asociar al invitado.";
+  }
+};*/
 
 // 📌 Iniciar escaneo de QR con @zxing/library
 function iniciarEscaneo() {
@@ -122,20 +243,23 @@ onBeforeUnmount(() => {
 
 // 📌 Computada para determinar el fondo según el estado
 const fondoSocio = computed(() => {
-  if (!datosSocio.value) return { backgroundColor: "white" };
+  if (!datosBusqueda.value) return { backgroundColor: "white" };
 
-  const tipoRelacion = datosSocio.value["Relacion"].trim().toLowerCase();
+  const tipoRelacion = datosBusqueda.value["Relacion"] || "Invitado";
   console.log("Tipo de relación detectado:", tipoRelacion);
+  if(tipoRelacion)
   switch (tipoRelacion) {
     case "vigente":
       return { backgroundColor: "green", color: "white" };
-    case "licencia":
+    case "Licencia":
       return { backgroundColor: "lightblue", color: "black" };
-    case "deudor":
+    case "Deudor":
       return { backgroundColor: "red", color: "white" };
-    case "invitado":
+    case "Invitado":
       return { backgroundColor: "purple", color: "white" };
-    case "no paga":
+    case "No paga":
+      return { backgroundColor: "green", color: "white" };
+    case "empleado":
       return { backgroundColor: "darkgreen", color: "white" };
     default:
       return { backgroundColor: "gray", color: "white" };
@@ -157,7 +281,7 @@ const fondoSocio = computed(() => {
 
 .label {
   font-weight: bold;
-  font-size: 24px;
+  font-size: 18px;
   margin-top: 10px;
 }
 
@@ -179,24 +303,28 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
-.vigente {
+.Vigente {
   background-color: green;
   color: white;
 }
-.licencia {
+.Licencia {
   background-color: lightblue;
   color: black;
 }
-.deudor {
+.Deudor {
   background-color: red;
   color: white;
 }
-.invitado {
+.Invitado {
   background-color: purple;
   color: white;
 }
-.no-paga {
-  background-color: darkgreen;
+.No-paga {
+  background-color: green;
+  color: white;
+}
+.empleado {
+  background-color: rgb(10, 89, 10);
   color: white;
 }
 .default {
