@@ -12,16 +12,20 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@quasar/extras": "^1.16.17",
     "@tauri-apps/plugin-fs": "^2.2.0",
     "@tauri-apps/plugin-log": "^2.3.0",
     "@zxing/library": "^0.21.3",
     "axios": "^1.8.4",
     "jsqr": "^1.4.0",
+    "quasar": "^2.18.1",
     "vite": "^4.0.0",
     "vue": "^3.0.0",
-    "vue-qrcode-reader": "^5.7.1"
+    "vue-qrcode-reader": "^5.7.1",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@quasar/vite-plugin": "^1.9.0",
     "@tauri-apps/api": "^2.3.0",
     "@tauri-apps/cli": "^2.3.1",
     "@vitejs/plugin-vue": "^5.2.1",

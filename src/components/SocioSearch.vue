@@ -1,61 +1,54 @@
 <template>
-  <div>
-    <input
-  v-model="codigoIngreso"
-  placeholder="Ingrese código"
-  @keyup.enter="() => buscarUsuario(codigoIngreso)"
-/>
-    
-    <button @click="iniciarScanner">Escanear QR</button>
-
-    <div v-if="usuario" :style="{ backgroundColor: usuario.color, padding: '10px', borderRadius: '5px', color: 'white' }">
-      
-      <!-- Caso: Socio -->
-      <template v-if="usuario.Relacion === 'socio'">
-        <p><strong>Código:</strong> {{ usuario.Socio }}</p>
-        <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
-        <p><strong>Relación:</strong>{{ usuario.Relacion }}</p>
-      </template>
-
-      <!-- Caso: Empleado -->
-      <template v-else-if="usuario.Relacion === 'empleado'">
-        <!-- <p><strong>Código:</strong> {{ usuario.codigo }}</p> -->
-        <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
-     <!--    <p><strong>Relación:</strong> Empleado</p> -->
-      </template>
-
-      <!-- Caso: Socio FEB -->
-      <template v-else-if="usuario.Relacion === 'socio-feb'">
-        <p><strong>Código:</strong> {{ usuario.idCodigo }}</p>
-        <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
-        
-      </template>
-
-      <!-- Caso: Invitado común -->
-      <template v-else-if="usuario.Relacion === 'invitado'">
-        <p><strong>Invitado</strong> </p>
-       
-      </template>
-
-      <!-- Caso: Invitado FEB -->
-      <template v-else-if="usuario.Relacion === 'invitado-feb'">
-        <p><strong>Invitado FEB</strong></p>
-        
-      </template>
-
-      <!-- Fallback por si hay algo no identificado -->
-      <template v-else>
-        <p><strong>Desconocido</strong> </p>
-      </template>
-
+  <div class="contenedor">
+    <!-- Input + Botón -->
+    <div class="input-section">
+      <input
+        v-model="codigoIngreso"
+        placeholder="Ingrese código"
+        @keyup.enter="() => buscarUsuario(codigoIngreso)"
+      />
+      <button @click="iniciarScanner">📷 ESCANEAR QR</button>
     </div>
 
-    <video ref="videoElement" v-show="escaneando" autoplay></video>
-    <canvas ref="canvasElement" style="display: none;"></canvas>
+    <!-- Contenedor principal: Datos + Cámara -->
+    <div class="principal">
+      <!-- Datos usuario -->
+      <div class="datos">
+        <div v-if="usuario"  :style="{ backgroundColor: usuario.color, padding: '10px', borderRadius: '5px', color: 'white' }">
+          <template  v-if="usuario.Relacion === 'socio'">
+            <p><strong>Código:</strong> {{ usuario.Socio }}</p>
+            <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
+            <p><strong>Relación:</strong> {{ usuario.Relacion }}</p>
+          </template>
+          <template v-else-if="usuario.Relacion === 'empleado'">
+            <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+          </template>
+          <template v-else-if="usuario.Relacion === 'socio-feb'">
+            <p><strong>Código:</strong> {{ usuario.idCodigo }}</p>
+            <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
+          </template>
+          <template v-else-if="usuario.Relacion === 'invitado'">
+            <p><strong>Invitado</strong></p>
+          </template>
+          <template v-else-if="usuario.Relacion === 'invitado-feb'">
+            <p><strong>Invitado FEB</strong></p>
+          </template>
+          <template v-else>
+            <p><strong>Desconocido</strong></p>
+          </template>
+        </div>
+      </div>
+
+      <!-- Cámara -->
+      <div class="camara">
+        <video ref="videoElement" v-show="escaneando" autoplay></video>
+        <canvas ref="canvasElement" style="display: none;"></canvas>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script >
 import { ref, onMounted, onUnmounted } from "vue";
 import { buscarSocioEnDB, buscarEmpleadoEnDB,getConfiguracion,addGuestEntry,addIngresoComun} from "../utils/indexedDB.js";
 import jsQR from "jsqr";
@@ -244,5 +237,60 @@ video {
   width: 100%;
   max-width: 400px;
   border: 1px solid #ccc;
+}
+.contenedor {
+  padding: 20px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.input-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.input-section input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.input-section button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.principal {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.datos {
+  
+  width: 50%;
+  height: 50%;
+flex:3;
+  border-radius: 8px;
+}
+
+.camara {
+flex:1;
+  border-radius: 8px;
+}
+
+video {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 </style>

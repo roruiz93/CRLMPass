@@ -1,48 +1,49 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import AdminRules from './components/AdminRules.vue';
-import DocumentsIn from './components/DocumentsIn.vue';
-import SocioSearch from './components/SocioSearch.vue';
-import IngresosWindows from './components/IngresosWindows.vue';
-import { ref } from 'vue';
-
-const isMenuOpen = ref(false); // Estado para controlar la apertura/cierre del menú
-</script>
 <template>
-  <div>
-    <!-- Botón para abrir/cerrar el menú -->
-    <button @click="isMenuOpen = !isMenuOpen">
-      {{ isMenuOpen ? "Cerrar Documentos" : "Abrir Documentos" }}
-    </button>
+  <q-layout view="lHh Lpr lFf">
 
-    <!-- Menú expansible -->
-    <div v-show="isMenuOpen" class="menu-container">
-      <DocumentsIn />
-    </div>
-    <AdminRules></AdminRules>
-    <IngresosWindows></IngresosWindows>
-    <SocioSearch />
-  </div>
+    <!-- Menú lateral -->
+    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
+      <q-list>
+        <q-item clickable v-ripple to="/otra-ruta">
+          <q-item-section avatar>
+            <q-icon name="dashboard" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Otro Componente</q-item-label>
+          </q-item-section>
+        </q-item>
+        <!-- podés agregar más ítems acá -->
+      </q-list>
+    </q-drawer>
+
+    <!-- Barra superior (opcional) -->
+    <q-header elevated>
+      <q-toolbar class="tittle-Menu">
+        <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+        <q-toolbar-title >CLUB REGATAS LA MARINA</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
+    <!-- Contenido principal -->
+    <q-page-container>
+      <router-view class="flex flex-center" />
+    </q-page-container>
+
+  </q-layout>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<script setup>
+import { ref } from 'vue'
+
+const leftDrawerOpen = ref(false)
+</script>
+
+<style>
+/* Asegura que el contenido (como SocioSearch) quede centrado */
+.q-page-container {
+  min-height: 100vh;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-.menu-container {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.tittle-Menu{
+  background-color: red ;
 }
 </style>

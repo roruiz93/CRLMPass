@@ -97,13 +97,18 @@ export function setConfiguracion(id, value) {
     openDatabase().then((db) => {
       const tx = db.transaction("configuracion", "readwrite");
       const store = tx.objectStore("configuracion");
-      const request = store.put({ id, value });
+      
+      // 🔥 Este objeto debe tener `id` válido
+      const configObj = { id, value };
+
+      const request = store.put(configObj);
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     }).catch(reject);
   });
 }
+
 
 // --- Buscar socio por número ---
 export function buscarSocioEnDB(numero) {
