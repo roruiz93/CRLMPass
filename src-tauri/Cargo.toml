@@ -25,4 +25,6 @@ tauri = { version = "2.2.4", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 calamine = "0.18"  # Esta crate maneja la lectura y escritura de archivos Excel.
 tauri-plugin-fs = "2"
-
+rocket = { version = "0.5.0-rc.2", features = ["json"] }
+lazy_static = "1.4"
+rocket_cors = "0.6.0"

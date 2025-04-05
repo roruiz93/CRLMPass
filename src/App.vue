@@ -1,5 +1,6 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
+import AdminRules from './components/AdminRules.vue';
 import DocumentsIn from './components/DocumentsIn.vue';
 import SocioSearch from './components/SocioSearch.vue';
 import { ref } from 'vue';
@@ -17,7 +18,7 @@ const isMenuOpen = ref(false); // Estado para controlar la apertura/cierre del m
     <div v-show="isMenuOpen" class="menu-container">
       <DocumentsIn />
     </div>
-
+    <AdminRules></AdminRules>
     <SocioSearch />
   </div>
 </template>

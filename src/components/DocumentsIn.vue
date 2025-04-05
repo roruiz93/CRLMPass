@@ -4,7 +4,7 @@
     
     <!-- Incluir ambos componentes de carga -->
     <SociosUpFile />
-    <OperarioUpFile />
+  <OperarioUpFile /> 
   </div>
 </template>
 

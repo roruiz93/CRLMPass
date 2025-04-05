@@ -16,6 +16,8 @@
   import * as XLSX from "xlsx";
   //import { saveJsonToIndexedDB } from "../utils/indexedDB"; // Importar función reutilizable
   
+  const DB_NAME = "CRLMPassDB";
+const DB_VERSION = 3;
   const file = ref(null);
   const excelJson = ref([]);
   
@@ -53,12 +55,12 @@ async function convertExcelToJson() {
 
 // Guardar JSON en IndexedDB
 function saveJsonToIndexedDB(jsonData) {
-  const request = indexedDB.open("CRLMPassDB", 1);
+  const request = indexedDB.open(DB_NAME, DB_VERSION);
 
   request.onupgradeneeded = function (event) {
     const db = event.target.result;
     if (!db.objectStoreNames.contains("socios")) {
-      db.createObjectStore("socios", { keyPath: "id" });
+      db.createObjectStore("socios", { keyPath: "Socio" });
     }
   };
 
@@ -67,7 +69,11 @@ function saveJsonToIndexedDB(jsonData) {
     const transaction = db.transaction("socios", "readwrite");
     const store = transaction.objectStore("socios");
 
-    store.put({ id: 1, data: jsonData });
+    jsonData.forEach((Socios) => {
+        if (Socios.Socio) {
+          store.put(Socios); // Guarda cada socio  usando "Socio" como clave
+        }
+      });
 
     console.log("✅ JSON guardado en IndexedDB");
   };
