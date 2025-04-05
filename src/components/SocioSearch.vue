@@ -55,9 +55,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { buscarSocioEnDB, buscarEmpleadoEnDB,getConfiguracion } from "../utils/indexedDB.js";
+import { buscarSocioEnDB, buscarEmpleadoEnDB,getConfiguracion,addGuestEntry,addIngresoComun} from "../utils/indexedDB.js";
 import jsQR from "jsqr";
 
 export default {
@@ -99,6 +99,7 @@ export default {
             nombre: configInv.nombre || (tipo === "invitado" ? "Invitado" : "Invitado FEB"),
             Relacion: tipo === "invitado" ? "invitado" : "invitado-feb",
             color: tipo === "invitado" ? asignarColor("Invitado") : asignarColor("invitado-feb")
+           
           };
         } else {
           usuario.value = {
@@ -108,6 +109,7 @@ export default {
             color: asignarColor("Desconocido")
           };
         }
+        addGuestEntry(tipo,usuario.value.nombre);
       })
       .catch((error) => {
         console.error("Error al buscar invitado:", error);
@@ -139,10 +141,13 @@ export default {
     .then((data) => {
       if (data?.Socio) {
         usuario.value = { ...data, Relacion: "socio", color: asignarColor("Socio") };
+        addIngresoComun("socio", data.Nombre, data.Socio);
       } else if (data?.codigo) {
         usuario.value = { ...data, Relacion: "empleado", color: asignarColor("Empleado") };
+        addIngresoComun("empleado", data.nombre, data.codigo);
       } else if (data?.idCodigo) {
-        usuario.value = { ...data, Relacion: "socio-feb", color: asignarColor("Socio") };
+        usuario.value = { ...data, Relacion: "socio-feb", color: asignarColor("socio-feb") };
+        addIngresoComun("socio-feb", data.nombre || data.idCodigo, data.idCodigo);
       } else {
         usuario.value = {
           codigo,

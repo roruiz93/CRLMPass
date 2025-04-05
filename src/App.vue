@@ -3,6 +3,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import AdminRules from './components/AdminRules.vue';
 import DocumentsIn from './components/DocumentsIn.vue';
 import SocioSearch from './components/SocioSearch.vue';
+import IngresosWindows from './components/IngresosWindows.vue';
 import { ref } from 'vue';
 
 const isMenuOpen = ref(false); // Estado para controlar la apertura/cierre del menú
@@ -19,6 +20,7 @@ const isMenuOpen = ref(false); // Estado para controlar la apertura/cierre del m
       <DocumentsIn />
     </div>
     <AdminRules></AdminRules>
+    <IngresosWindows></IngresosWindows>
     <SocioSearch />
   </div>
 </template>

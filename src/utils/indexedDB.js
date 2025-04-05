@@ -51,17 +51,29 @@ export function addGuestEntry(guestType, guestName) {
 
     configRequest.onsuccess = () => {
       const price = configRequest.result?.value || 0;
-      const ingresosTx = db.transaction("ingresos", "readwrite");
-      const ingresosStore = ingresosTx.objectStore("ingresos");
 
-      ingresosStore.put({
-        id: `${guestType}-${Date.now()}`,
+      registrarIngreso({
         name: guestName,
         type: guestType,
-        price,
-        date: new Date().toISOString()
+        price
       });
     };
+  }).catch(console.error);
+}
+
+// ---ingreso comun para socios,socios de FEB y empleados
+export function addIngresoComun(tipo, nombre) {
+  openDatabase().then((db) => {
+    const ingresosTx = db.transaction("ingresos", "readwrite");
+    const ingresosStore = ingresosTx.objectStore("ingresos");
+
+    ingresosStore.put({
+      id: `${tipo}-${Date.now()}`,
+      name: nombre,
+      type: tipo,
+      price: 0,
+      date: new Date().toISOString()
+    });
   }).catch(console.error);
 }
 
@@ -135,3 +147,33 @@ export function buscarSocioFebEnDB(idCodigo) {
     }).catch(reject);
   });
 }
+//---REgistrar ingresos---
+export function registrarIngreso({ id, name, type = "desconocido", price = 0 }) {
+  return openDatabase().then((db) => {
+    const ingresosTx = db.transaction("ingresos", "readwrite");
+    const ingresosStore = ingresosTx.objectStore("ingresos");
+
+    return ingresosStore.put({
+      id: id || `${type}-${Date.now()}`,
+      name,
+      type,
+      price,
+      date: new Date().toISOString()
+    });
+  });
+}
+
+//---devuelve los ingresos---
+export function getIngresos() {
+  return new Promise((resolve, reject) => {
+    openDatabase().then((db) => {
+      const tx = db.transaction("ingresos", "readonly");
+      const store = tx.objectStore("ingresos");
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject("Error al obtener ingresos");
+    }).catch(reject);
+  });
+}
+

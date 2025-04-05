@@ -36,33 +36,36 @@
   const mostrarModificarPrecioInvitadoFeb = ref(false);
   
   onMounted(async () => {
-    try {
-      const config = await getConfiguracion();
-      if (config.length > 0) {
-        precioInvitado.value = config[0].invitado || 0;
-        precioInvitadoFeb.value = config[0].invitadoFEB || 0;
-      }
-    } catch (err) {
-      console.error("Error al cargar configuración", err);
-    }
-  });
+  try {
+    const config = await getConfiguracion();
+    const invitado = config.find(c => c.id === "invitado");
+    const invitadoFEB = config.find(c => c.id === "invitadoFEB");
+
+    precioInvitado.value = invitado?.value || 0;
+    precioInvitadoFeb.value = invitadoFEB?.value || 0;
+  } catch (err) {
+    console.error("Error al cargar configuración", err);
+  }
+});
+
   
   async function modificarPrecioInvitado() {
-    try {
-      await setConfiguracion({ invitado: precioInvitado.value, invitadoFEB: precioInvitadoFeb.value });
-      mostrarModificarPrecioInvitado.value = false;
-    } catch (err) {
-      console.error("Error al actualizar el precio de invitados:", err);
-    }
+  try {
+    await setConfiguracion("invitado", precioInvitado.value);
+    mostrarModificarPrecioInvitado.value = false;
+  } catch (err) {
+    console.error("Error al actualizar el precio de invitados:", err);
   }
-  
-  async function modificarPrecioInvitadoFeb() {
-    try {
-      await setConfiguracion({ invitado: precioInvitado.value, invitadoFEB: precioInvitadoFeb.value });
-      mostrarModificarPrecioInvitadoFeb.value = false;
-    } catch (err) {
-      console.error("Error al actualizar el precio de invitados FEB:", err);
-    }
+}
+
+async function modificarPrecioInvitadoFeb() {
+  try {
+    await setConfiguracion("invitadoFEB", precioInvitadoFeb.value);
+    mostrarModificarPrecioInvitadoFeb.value = false;
+  } catch (err) {
+    console.error("Error al actualizar el precio de invitados FEB:", err);
   }
+}
+
   </script>
   
