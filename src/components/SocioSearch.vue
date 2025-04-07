@@ -7,14 +7,13 @@
         placeholder="Ingrese código"
         @keyup.enter="() => buscarUsuario(codigoIngreso)"
       />
-      <button @click="iniciarScanner">📷 ESCANEAR QR</button>
     </div>
 
     <!-- Contenedor principal: Datos + Cámara -->
     <div class="principal">
       <!-- Datos usuario -->
       <div class="datos">
-        <div v-if="usuario"  :style="{ backgroundColor: usuario.color, padding: '10px', borderRadius: '5px', color: 'white' }">
+        <div v-if="usuario"  :style="{ backgroundColor: usuario.color,width:'100%', height:'98%', borderRadius: '5px', color: 'white' }">
           <template  v-if="usuario.Relacion === 'socio'">
             <p><strong>Código:</strong> {{ usuario.Socio }}</p>
             <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
@@ -38,7 +37,7 @@
           </template>
         </div>
       </div>
-
+   
       <!-- Cámara -->
       <div class="camara">
         <video ref="videoElement" v-show="escaneando" autoplay></video>
@@ -71,6 +70,9 @@ export default {
       "Desconocido": "gray",
     };
 
+    onMounted(() => {
+  iniciarScanner(); // inicia la cámara automáticamente
+});
     function asignarColor(Relacion) {
       return colores[Relacion] || "gray";
     }
@@ -233,11 +235,6 @@ div {
   padding: 10px;
 }
 
-video {
-  width: 100%;
-  max-width: 400px;
-  border: 1px solid #ccc;
-}
 .contenedor {
   padding: 20px;
   max-width: 1000px;
@@ -276,9 +273,7 @@ video {
 
 .datos {
   
-  width: 50%;
-  height: 50%;
-flex:3;
+flex:1;
   border-radius: 8px;
 }
 
@@ -289,8 +284,9 @@ flex:1;
 
 video {
   width: 100%;
-  max-width: 100%;
+  max-width: auto;
   border: 1px solid #ccc;
   border-radius: 5px;
+  object-fit: cover;
 }
 </style>
