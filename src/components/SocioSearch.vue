@@ -13,7 +13,8 @@
     <div class="principal">
       <!-- Datos usuario -->
       <div class="datos">
-        <div v-if="usuario"  :style="{ backgroundColor: usuario.color,width:'100%', height:'98%', borderRadius: '5px', color: 'white' }">
+        <div v-if="usuario"  :style="{ backgroundColor: usuario.color,width:'100%', height:'98%', borderRadius: '5px', 
+        color: 'white', fontFamily:'Georgia', fontSize:'22px',justifyContent:'center',alignItems:'center' }">
           <template  v-if="usuario.Relacion === 'socio'">
             <p><strong>Código:</strong> {{ usuario.Socio }}</p>
             <p><strong>Nombre:</strong> {{ usuario.Nombre }}</p>
@@ -288,5 +289,9 @@ video {
   border: 1px solid #ccc;
   border-radius: 5px;
   object-fit: cover;
+}
+.p{
+  display: flex;
+  align-items: center;
 }
 </style>

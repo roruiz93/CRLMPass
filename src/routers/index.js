@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import SocioSearch from '../components/SocioSearch.vue'
 import ListarIngresos from '../components/ListarIngresos.vue'
 import DocumentsIn from '../components/DocumentsIn.vue';
+import AdminRules from '../components/AdminRules.vue';
 
 const routes = [
   {
@@ -13,6 +14,11 @@ const routes = [
     path: '/ingresos',
     name: 'ListarIngresos',
     component: ListarIngresos
+  },
+  {
+    path: '/valores',
+    name: 'Valores',
+    component: AdminRules
   },
   {
     path: '/archivos',
