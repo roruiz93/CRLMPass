@@ -136,9 +136,21 @@ export default {
   promesaBusqueda
     .then((data) => {
       if (data?.Socio) {
-        usuario.value = { ...data, Relacion: "socio", color: asignarColor("Socio") };
-        addIngresoComun("socio", data.Nombre, data.Socio);
-      } else if (data?.codigo) {
+  let colorSocio = "green"; // por defecto
+
+  if (data.Relacion.toLowerCase() === "deudor") {
+    colorSocio = "#8B0000"; // rojo oscuro
+  } else if (data.Relacion.toLowerCase() === "licencia") {
+    colorSocio = "#90EE90"; // verde claro
+  }
+
+  usuario.value = {
+    ...data,
+    Relacion: "socio",
+    color: colorSocio
+  };
+  addIngresoComun("socio", data.Nombre, data.Socio);
+} else if (data?.codigo) {
         usuario.value = { ...data, Relacion: "empleado", color: asignarColor("Empleado") };
         addIngresoComun("empleado", data.nombre, data.codigo);
       } else if (data?.idCodigo) {
@@ -273,8 +285,9 @@ div {
 }
 
 .datos {
-  
-flex:1;
+  flex:1;
+  display: flex;
+    flex-wrap: wrap;
   border-radius: 8px;
 }
 

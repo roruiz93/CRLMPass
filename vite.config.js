@@ -12,6 +12,7 @@ export default defineConfig({
   plugins: [
     vue({
       template: { transformAssetUrls }
+     
     }),
     quasar({
       sassVariables: 'src/quasar-variables.sass' // asegurate de que este archivo exista, aunque esté vacío

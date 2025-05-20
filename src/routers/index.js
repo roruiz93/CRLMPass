@@ -3,6 +3,8 @@ import SocioSearch from '../components/SocioSearch.vue'
 import ListarIngresos from '../components/ListarIngresos.vue'
 import DocumentsIn from '../components/DocumentsIn.vue';
 import AdminRules from '../components/AdminRules.vue';
+import ExportarArchivos from '../components/ExportarArchivos.vue';
+import ConfiguraciocionesApp from '../components/ConfiguraciocionesApp.vue';
 
 const routes = [
   {
@@ -19,6 +21,16 @@ const routes = [
     path: '/valores',
     name: 'Valores',
     component: AdminRules
+  },
+  {
+    path: '/exportar',
+    name: 'Exportar',
+    component: ExportarArchivos
+  },
+  {
+    path: '/configuraciones',
+    name: 'Configuraciones',
+    component: ConfiguraciocionesApp
   },
   {
     path: '/archivos',

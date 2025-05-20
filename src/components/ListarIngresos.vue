@@ -1,8 +1,9 @@
-<template>
+<template >
+  <div class="fechaingresoscliente">
     <div>
       <h2>Resumen de Ingresos</h2>
   
-      <div>
+      <div >
         <label>Desde:</label>
         <input type="date" v-model="filtroDesde" />
         <label>Hasta:</label>
@@ -15,7 +16,7 @@
           <tr>
             <th>Tipo</th>
             <th>Cantidad</th>
-            <th>Total (solo invitados)</th>
+            <th>Total </th>
           </tr>
         </thead>
         <tbody>
@@ -32,12 +33,9 @@
           </tr>
         </tbody>
       </table>
-  
-      <div style="margin-top: 1rem;">
-        <button @click="exportarExcel">Exportar a Excel</button>
-        <button @click="exportarPDF">Exportar a PDF</button>
-      </div>
     </div>
+
+  </div>
   </template>
   
   <script setup>
@@ -65,21 +63,23 @@
   }
   
   const resumen = computed(() => {
-    const datos = {};
-  
-    ingresosFiltrados.value.forEach(ing => {
-      if (!datos[ing.type]) {
-        datos[ing.type] = { cantidad: 0, total: ['invitado', 'invitadoFEB'].includes(ing.type) ? 0 : null };
-      }
-  
-      datos[ing.type].cantidad += 1;
-      if (datos[ing.type].total !== null) {
-        datos[ing.type].total += ing.price || 0;
-      }
-    });
-  
-    return datos;
+  const datos = {};
+
+  ingresosFiltrados.value.forEach(ing => {
+    // Solo incluir invitados e invitadosFEB
+    if (!['invitado', 'invitadoFEB'].includes(ing.type)) return;
+
+    if (!datos[ing.type]) {
+      datos[ing.type] = { cantidad: 0, total: 0 };
+    }
+
+    datos[ing.type].cantidad += 1;
+    datos[ing.type].total += ing.price || 0;
   });
+
+  return datos;
+});
+
   
   const totalCantidad = computed(() =>
     Object.values(resumen.value).reduce((acc, val) => acc + val.cantidad, 0)
@@ -89,17 +89,15 @@
     Object.values(resumen.value).reduce((acc, val) => acc + (val.total || 0), 0)
   );
   
-  // 🟢 Exportación a Excel y PDF (placeholder, se puede mejorar con xlsx y jsPDF)
-  function exportarExcel() {
-    alert("Exportar a Excel aún no implementado (puedo ayudarte con eso también 😉)");
-  }
-  
-  function exportarPDF() {
-    alert("Exportar a PDF aún no implementado (también puedo ayudarte con eso!)");
-  }
+
   </script>
   
   <style scoped>
+ .fechaingresoscliente {
+  display: flex;
+  flex-direction: column;
+}
+
   table {
     width: 100%;
     border-collapse: collapse;

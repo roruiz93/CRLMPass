@@ -5,8 +5,8 @@
       <button @click="convertExcelToJson" :disabled="!file">Convertir y Guardar JSON</button>
   
       <div v-if="excelJson.length">
-        <h3>Datos de Empleados en JSON:</h3>
-        <pre>{{ excelJson }}</pre>
+        <h3>Se cargo con exito</h3>
+       <!--<pre>{{ excelJson }}</pre>--> 
       </div>
     </div>
   </template>

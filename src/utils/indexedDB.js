@@ -9,7 +9,7 @@ const STORE_KEYS = {
 };
 
 // --- Apertura y creación de base de datos ---
-function openDatabase() {
+export function openDatabase() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
@@ -182,3 +182,20 @@ export function getIngresos() {
   });
 }
 
+export async function getAllFromStore(storeName) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => reject('Error al abrir la base de datos')
+
+    request.onsuccess = () => {
+      const db = request.result
+      const tx = db.transaction(storeName, "readonly")
+      const store = tx.objectStore(storeName)
+      const all = store.getAll()
+
+      all.onsuccess = () => resolve(all.result)
+      all.onerror = () => reject('Error al leer los datos')
+    }
+  })
+}
