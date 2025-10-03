@@ -5,6 +5,7 @@ import DocumentsIn from '../components/DocumentsIn.vue';
 import AdminRules from '../components/AdminRules.vue';
 import ExportarArchivos from '../components/ExportarArchivos.vue';
 import ConfiguraciocionesApp from '../components/ConfiguraciocionesApp.vue';
+import PagoSocio from '../components/PagoSocio.vue';
 
 const routes = [
   {
@@ -26,6 +27,11 @@ const routes = [
     path: '/exportar',
     name: 'Exportar',
     component: ExportarArchivos
+  },
+  {
+    path: '/pagos',
+    name: 'Pagos',
+    component: PagoSocio
   },
   {
     path: '/configuraciones',
